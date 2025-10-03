@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Surprise</title>
+
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Bootstrap JS CDN (untuk interaktivitas jika diperlukan, tapi kita pakai vanilla JS) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f5dc, #d2b48c);
+            /* Tema coklat susu */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-family: "Segoe UI", sans-serif;
+            padding: 10px;
+        }
+
+        /* Cake - Responsif (tetap custom, tapi kompatibel dengan Bootstrap) */
+        .cake {
+            position: relative;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 100%;
+        }
+
+        .layer {
+            height: 40px;
+            border-radius: 8px;
+            margin: -8px 0 0 0;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 0.7s, transform 0.7s;
+        }
+
+        .showLayer {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .layer1 {
+            width: 160px;
+            background: #6d4c41;
+        }
+
+        .layer2 {
+            width: 120px;
+            background: #8d6e63;
+        }
+
+        .layer3 {
+            width: 80px;
+            background: #a1887f;
+        }
+
+        /* Responsif untuk cake di mobile */
+        @media (max-width: 480px) {
+            .layer1 {
+                width: 120px;
+                height: 30px;
+            }
+
+            .layer2 {
+                width: 90px;
+                height: 30px;
+            }
+
+            .layer3 {
+                width: 60px;
+                height: 30px;
+            }
+
+            .cake {
+                margin-bottom: 15px;
+                transform: scale(0.8);
+            }
+        }
+
+        /* Candle */
+        .candle {
+            position: absolute;
+            top: -50px;
+            width: 12px;
+            height: 50px;
+            background: #ffeb3b;
+            border-radius: 5px;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .flame {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 16px;
+            height: 20px;
+            background: radial-gradient(circle, yellow 40%, orange 70%, transparent 80%);
+            border-radius: 50%;
+            animation: flicker 0.6s infinite alternate;
+            display: none;
+        }
+
+        @keyframes flicker {
+            0% {
+                transform: translateX(-50%) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(-50%) scale(1.2);
+                opacity: 0.8;
+            }
+        }
+
+        /* Buttons - Gunakan Bootstrap classes untuk konsistensi */
+        .btn-custom {
+            padding: 12px 22px;
+            margin-top: 15px;
+            font-size: 1rem;
+            min-width: 150px;
+            transition: transform 0.2s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-custom:hover {
+            transform: scale(1.05);
+        }
+
+        @media (max-width: 480px) {
+            .btn-custom {
+                padding: 10px 18px;
+                font-size: 0.9rem;
+                min-width: 120px;
+            }
+        }
+
+        /* Love falling - Di belakang cake */
+        .emoji {
+            position: absolute;
+            font-size: 28px;
+            animation: fall linear forwards;
+            z-index: -1;
+            /* Di belakang semua elemen */
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-50px) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .emoji {
+                font-size: 20px;
+            }
+        }
+
+        /* Efek Petasan/Confetti Lucu */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, #ff6b6b, #4ecdc4, #45b7d1, #f9ca24, #f0932b);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 3;
+            animation: confettiExplode 2s ease-out forwards;
+        }
+
+        @keyframes confettiExplode {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100px) translateX(50px) rotate(720deg) scale(0);
+                opacity: 0;
+            }
+        }
+
+        .confetti:nth-child(odd) {
+            animation: confettiExplode 2s ease-out forwards reverse;
+        }
+
+        .confetti.left {
+            animation: confettiExplodeLeft 2s ease-out forwards;
+        }
+
+        @keyframes confettiExplodeLeft {
+            0% {
+                transform: translateY(0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100px) translateX(-50px) rotate(-720deg) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Custom untuk Message Box - Bentuk Buku dengan Efek Flip */
+        .message-box {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.9) perspective(1000px) rotateY(5deg);
+            width: 80%;
+            max-width: 420px;
+            opacity: 0;
+            transition: opacity 0.7s ease, transform 0.7s ease;
+            z-index: 2;
+            border-radius: 5px;
+            box-shadow: 15px 15px 25px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(to right, #fff 95%, #f0f0f0 96%, #fff 97%);
+            border-left: 4px solid #d4af37;
+            /* Sampul buku emas */
+            overflow: hidden;
+        }
+
+        .message-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 10px;
+            height: 100%;
+            background: linear-gradient(to right, #d4af37, #f9e076, #d4af37);
+            border-right: 1px solid #b8941f;
+        }
+
+        .show {
+            opacity: 1;
+            transform: translateX(-50%) scale(1) perspective(1000px) rotateY(0deg);
+        }
+
+        /* Efek Flip Halaman Buku */
+        .book-container {
+            perspective: 1000px;
+            position: relative;
+            height: 200px;
+            /* Tinggi tetap untuk flip */
+            margin-left: 15px;
+        }
+
+        .page {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: white;
+            border-radius: 3px;
+            padding: 20px;
+            box-sizing: border-box;
+            backface-visibility: hidden;
+            transform-style: preserve-3d;
+            transition: transform 0.8s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Georgia', serif;
+            text-align: center;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .page.flipping {
+            transform: rotateY(-180deg);
+        }
+
+        .page.flipped {
+            transform: rotateY(-180deg);
+        }
+
+        .page-content {
+            font-size: 1.05rem;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .next-btn {
+            background: #ffc107;
+            color: #333;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'Georgia', serif;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .next-btn:hover {
+            background: #ffb300;
+        }
+
+        @media (max-width: 480px) {
+            .message-box {
+                width: 90%;
+                top: 15%;
+                transform: translateX(-50%) scale(0.9) perspective(500px) rotateY(3deg);
+            }
+
+            .show {
+                transform: translateX(-50%) scale(1) perspective(500px) rotateY(0deg);
+            }
+
+            .book-container {
+                height: 180px;
+            }
+
+            .page-content {
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Cake -->
+    <div class="cake" id="cake">
+        <!-- Layer kecil di atas (topping), lalu sedang, lalu besar di bawah (base) -->
+        <div class="layer layer3"></div>
+        <div class="layer layer2"></div>
+        <div class="layer layer1"></div>
+        <div class="candle" id="candle">
+            <div class="flame" id="flame"></div>
+        </div>
+    </div>
+
+    <button class="btn btn-dark btn-custom" id="blowBtn" style="display:none;">🎂 Blow the Candle</button>
+    <button class="btn btn-primary btn-custom" id="giftBtn" style="display:none;">🎁 Open Your Gift</button>
+
+    <!-- Message Box sebagai Buku dengan Efek Flip -->
+    <div class="message-box" id="messageBox">
+        <div class="book-container">
+            <div class="page" id="currentPage">
+                <div class="page-content" id="messageText"></div>
+                <button class="next-btn" id="nextBtn">Turn Page</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Love falling background */
+        function createEmoji() {
+            const emoji = document.createElement("div");
+            emoji.classList.add("emoji");
+            emoji.innerText = "❤️";
+            emoji.style.left = Math.random() * window.innerWidth + "px";
+            emoji.style.top = "-30px";
+            emoji.style.fontSize = (18 + Math.random() * 18) + "px";
+            emoji.style.animationDuration = (3 + Math.random() * 3) + "s";
+            document.body.appendChild(emoji);
+            setTimeout(() => emoji.remove(), 6000);
+        }
+        setInterval(createEmoji, 300);
+
+        /* Fungsi Petasan/Confetti Lucu */
+        function createConfetti(x, y) {
+            for (let i = 0; i < 20; i++) { // Buat 20 partikel confetti
+                const confetti = document.createElement("div");
+                confetti.classList.add("confetti");
+                confetti.style.left = x + "px";
+                confetti.style.top = y + "px";
+                confetti.style.background = `hsl(${Math.random() * 360}, 70%, 60%)`; // Warna random cerah
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+
+                // Variasi arah
+                if (i % 2 === 0) {
+                    confetti.classList.add("left");
+                }
+
+                document.body.appendChild(confetti);
+
+                // Hapus setelah animasi selesai
+                setTimeout(() => confetti.remove(), 2000);
+            }
+        }
+
+        /* Cake build step by step */
+        const layers = document.querySelectorAll(".layer");
+        const candle = document.getElementById("candle");
+        const flame = document.getElementById("flame");
+        const blowBtn = document.getElementById("blowBtn");
+        const giftBtn = document.getElementById("giftBtn");
+        const cake = document.getElementById("cake");
+
+        let i = 0;
+        function buildCake() {
+            if (i < layers.length) {
+                layers[i].classList.add("showLayer");
+                i++;
+                setTimeout(buildCake, 1000);
+            } else {
+                candle.style.opacity = 1;
+                setTimeout(() => { flame.style.display = "block"; }, 800);
+                blowBtn.style.display = "inline-block";
+            }
+        }
+        buildCake();
+
+        /* Blow candle - Tambah efek petasan */
+        blowBtn.addEventListener("click", () => {
+            flame.style.display = "none";
+            blowBtn.style.display = "none";
+            giftBtn.style.display = "inline-block";
+
+            // Dapatkan posisi cake untuk pusat confetti
+            const cakeRect = cake.getBoundingClientRect();
+            const x = cakeRect.left + cakeRect.width / 2;
+            const y = cakeRect.top + cakeRect.height / 2;
+            createConfetti(x, y); // Ledakkan petasan dari posisi kue
+        });
+
+        /* Messages */
+        const messages = [
+            "🎂 Happy Birthday to the man I admire.",
+            "May this year bring you success, growth, and endless opportunities.",
+            "I'm proud of everything you've achieved and who you are becoming.",
+            "Keep chasing your dreams—I believe in you completely.",
+            "Here's to more wins, more happiness, and a brighter future ahead. ❤️"
+        ];
+
+        let currentSlide = 0;
+        const messageBox = document.getElementById("messageBox");
+        const messageText = document.getElementById("messageText");
+        const nextBtn = document.getElementById("nextBtn");
+        const currentPage = document.getElementById("currentPage");
+
+        giftBtn.addEventListener("click", () => {
+            giftBtn.style.display = "none";
+            messageBox.classList.add("show");
+            messageText.innerHTML = messages[currentSlide];
+        });
+
+        nextBtn.addEventListener("click", () => {
+            if (currentSlide < messages.length - 1) {
+                // Trigger flip animation
+                currentPage.classList.add("flipping");
+
+                setTimeout(() => {
+                    currentSlide++;
+                    messageText.innerHTML = messages[currentSlide];
+                    currentPage.classList.remove("flipping");
+                    currentPage.classList.add("flipped");
+                    // Reset untuk flip berikutnya
+                    setTimeout(() => {
+                        currentPage.classList.remove("flipped");
+                    }, 100);
+                }, 400); // Setengah durasi animasi (0.8s / 2)
+            } else {
+                // Halaman terakhir
+                messageText.innerHTML = "🎉 That's all... Happy Birthday once again! 🎉";
+                nextBtn.style.display = "none";
+                nextBtn.textContent = ""; // Kosongkan tombol
+            }
+        });
+    </script>
+
+</body>
+
+</html>
